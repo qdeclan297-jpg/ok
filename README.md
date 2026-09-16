@@ -65,6 +65,7 @@ docs/INDEX_FUNDS.md     Part 3: Vanguard funds -- what actually beat 4%
 docs/EMERGING_MARKETS.md Part 4: emerging markets, growth stories, bonds
 docs/UK_300_A_MONTH.md  Part 5: UK, £300/month -- the practical answer
 docs/PHILIPPINES_PLAN.md Part 6: dividends, and the Philippines goal
+docs/HOW_TO_BUY_VWRL.md Practical: how to actually buy the fund
 research/01..03         EUR/USD and multi-pair FX studies
 research/04             multi-asset study; fetch_data.py downloads the data
 research/05             Vanguard index funds; fetch_vanguard.py downloads the data
