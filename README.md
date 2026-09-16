@@ -69,6 +69,7 @@ research/04             multi-asset study; fetch_data.py downloads the data
 research/05             Vanguard index funds; fetch_vanguard.py downloads the data
 research/06             emerging markets vs GDP growth; EM and global bonds
 research/07             UK £300/month projections: wrappers, platforms, fees
+research/08             the same in real terms; validates 6.6%/yr real equities
 ```
 
 > **Read [docs/INDEX_FUNDS.md](docs/INDEX_FUNDS.md) before this one.** Across all

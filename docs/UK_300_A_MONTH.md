@@ -1,5 +1,7 @@
 # Part 5: £300 a month, UK, long-term growth
 
+*All figures inflation-adjusted. Written for a 26-year-old investor.*
+
 £300/month in pounds changes the answer from the previous parts. For a UK
 investor the **wrapper you use is worth far more than the fund you pick**, and
 there are two options that beat every investment decision on the table because
@@ -9,23 +11,74 @@ Numbers reproduce with `research/07_uk_300_per_month.py`.
 
 ---
 
-## 1. What £300/month actually becomes
+## 1. What £300/month actually becomes — in today's money
 
-| Years | Paid in | @4%/yr | @6%/yr | @8%/yr | @10%/yr |
-|---|---|---|---|---|---|
-| 5 | £18,000 | £19,854 | £20,846 | £21,883 | £22,968 |
-| 10 | £36,000 | £44,009 | £48,742 | £54,037 | £59,959 |
-| 20 | £72,000 | £109,153 | £136,032 | £170,700 | £215,478 |
-| 30 | £108,000 | £205,581 | £292,354 | **£422,565** | £618,853 |
-| 35 | £126,000 | £269,975 | £412,081 | £642,770 | £1,019,637 |
+> **Correction.** An earlier version of this page showed only *nominal* figures.
+> Those pound amounts were arithmetically right but overstated what the money
+> will actually buy. Everything below is inflation-adjusted.
 
-4% is your savings account. 8% is roughly what global equities have delivered
-long run. **At 30 years that difference is £217,000** — and it is the entire
-argument for investing rather than saving.
+**The nominal headline was £422,565 after 30 years at 8%. At 3% inflation that
+buys what £174,091 buys today.** Roughly 40% of the headline. At 4% inflation,
+£130,285.
 
-Note how little separates the columns at 5 years and how much at 30. Compounding
-does almost nothing early and almost everything late. That is why the single most
-valuable thing you have here is *time*, not fund selection.
+Real (inflation-adjusted) projections, assuming 3% inflation:
+
+| Years | Paid in | @1% real | @5% real | @6.6% real |
+|---|---|---|---|---|
+| 10 | £36,000 | £32,878 | £40,622 | £44,256 |
+| 20 | £72,000 | £60,781 | £96,397 | £116,790 |
+| 30 | £108,000 | £85,344 | £179,512 | £245,801 |
+| **34 (age 60)** | £122,400 | £94,524 | £224,383 | £323,787 |
+| 39 (age 65) | £140,400 | £105,635 | £293,328 | £452,937 |
+
+**1% real is your savings account** — 4.1% minus ~3.1% UK inflation. **6.6% real
+is what global equities have returned since 1900**, per the UBS/DMS Yearbook
+across 126 years and 35 markets. I checked that independently against S&P 500
+and US CPI data since 1947 and got **6.5% real**, which is close enough to trust.
+
+Look at the 1% real column. **After 30 years of paying in £108,000 you'd have
+about £85,000 of purchasing power.** A savings account at today's rates does not
+lose to inflation, but it barely beats it, and the contributions themselves erode.
+
+### Index your contributions
+
+The table above assumes £300/month *forever*. In real terms that payment shrinks
+every year. If you raise it with inflation — £300 in today's money, every month —
+the outcome changes materially:
+
+| To age 60 (34 yrs) | @5% real | @6.6% real |
+|---|---|---|
+| Fixed £300/month | £224,383 | £323,787 |
+| **£300/month, indexed to inflation** | **£313,197** | **£437,337** |
+
+Raising your contribution with each pay rise is worth roughly £90,000–£115,000
+in today's money. It costs you nothing in real terms — you're standing still, not
+stretching.
+
+### Why inflation makes the case for equities *stronger*
+
+This is the counterintuitive bit. Inflation doesn't argue against investing — it
+argues against *cash*.
+
+| Asset | Real return |
+|---|---|
+| Cash/bills, 1900–2025 | ~0.5–0.9%/yr |
+| Your savings account, today | ~1.0%/yr |
+| Bonds, 1900–2025 | 1.6%/yr |
+| **Global equities, 1900–2025** | **6.6%/yr** |
+
+Over the 34 years between you and 60, £1 becomes, in today's purchasing power:
+
+| | |
+|---|---|
+| Cash at 0.9% real | **£1.36** |
+| Your savings at 1.0% real | **£1.40** |
+| Bonds at 1.6% real | £1.72 |
+| **Equities at 6.6% real** | **£8.79** |
+
+That gap — £1.40 against £8.79 — is the entire argument, and it is *already*
+net of inflation. Compounding does almost nothing early and almost everything
+late, which is why at 26 your biggest asset is time, not fund selection.
 
 ---
 
@@ -50,20 +103,23 @@ to fix, ahead of every other decision in this document.
 **The catch:** locked until age 57–58, and taxable on the way out beyond the 25%
 tax-free lump sum. It is retirement money, not general savings.
 
-### Second: Lifetime ISA, if you're eligible
+### Second: Lifetime ISA — at 26 you're comfortably eligible
 
 Open between 18 and 39, contribute until 50. The government adds **25% on every
 pound**, up to £1,000/year on £4,000 contributed. Your £3,600/year sits under
 that cap, so **you'd get the full £900/year**.
 
-| Years | £300/mo into ISA | £300/mo into LISA | Difference |
-|---|---|---|---|
-| 10 | £54,037 | £67,547 | +£13,509 |
-| 20 | £170,700 | £213,375 | +£42,675 |
-| 30 | £422,565 | **£528,206** | **+£105,641** |
+**At 26 you have 24 more contributing years — up to £21,600 of free government
+money.** In real terms, to age 60 at 5% real with indexed contributions:
 
-A guaranteed 25% before any market return. No investment on this list offers
-that.
+| | Value at 60, today's money |
+|---|---|
+| Plain Stocks & Shares ISA | £313,197 |
+| **LISA (bonus to 50, then ISA)** | **£379,919** |
+| Difference | **+£66,722** |
+
+A guaranteed 25% before any market return, and — unlike a fixed interest rate —
+**the bonus is inflation-proof**, because it's a percentage of what you put in.
 
 **The catches, and they are real:**
 - Penalty-free only for a **first home under £450,000**, or from **age 60**.
@@ -155,15 +211,18 @@ carry for non-US investors.
 For £300/month aimed at long-term growth, in order:
 
 1. **Check your workplace pension match.** If there's unclaimed employer match,
-   redirect there first. Free money, ~£750k difference over 30 years.
-2. **If you're under 40 and might buy a first home, or want retirement money at
-   60:** a LISA gives a guaranteed +25%. Worth ~£105k over 30 years. Understand
-   the withdrawal penalty first, and note it closes to new savers in 2028.
+   redirect there first. It is the largest single number in this document.
+2. **A LISA, if a first home is anywhere in your plans.** At 26 you're eligible
+   for 24 more years and it's worth ~£67k in today's money. Understand the 25%
+   withdrawal penalty and the £450,000 property cap first, and note it closes to
+   new savers in April 2028 — so if you want one, opening it is time-sensitive.
 3. **Otherwise, or alongside:** Stocks & Shares ISA on a zero-fee platform
    (Trading 212 or InvestEngine), one global index fund, accumulating, set up as
    an automatic monthly purchase.
-4. **Then leave it alone.** The 30-year column only happens if you don't
-   interrupt it.
+4. **Raise the £300 with each pay rise.** Worth ~£90k–£115k in real terms, and
+   it costs you nothing in purchasing power.
+5. **Then leave it alone.** The 34-year column only happens if you don't
+   interrupt it. At 26, the biggest risk to that number is you, not the market.
 
 The boring answer, one more time, is the one that won every test across five
 studies: **one global fund, lowest possible fees, inside a tax wrapper, bought
@@ -175,7 +234,8 @@ automatically every month, held for decades.**
 
 - **Whether your employer matches, and at what rate.** This is the single
   highest-value unknown here. Check your payslip or HR portal.
-- **Your age**, which determines LISA eligibility entirely.
+- ~~Your age~~ — you're 26, so LISA-eligible for 24 more contributing years,
+  and roughly 34 years from 60.
 - **Whether you'll need this money sooner.** Everything above assumes you won't
   touch it. If you might need it within ~5 years, the 4% savings account is the
   right home — Part 3 showed 27% of single years in the S&P 500 lost money.
@@ -204,3 +264,8 @@ situation is complicated.
 - [The cheapest global tracker — interactive investor](https://www.ii.co.uk/analysis-commentary/fund-now-cheapest-global-tracker-ii538640)
 - [Low-cost index trackers — Monevator](https://monevator.com/low-cost-index-trackers/)
 - [Pies & AutoInvest — Trading 212](https://helpcentre.trading212.com/hc/en-us/articles/30661163244317-Pies-AutoInvest-Introduction)
+- [UBS Global Investment Returns Yearbook 2026 — equities 6.6% real, bonds 1.6% real since 1900](https://www.ubs.com/global/en/investment-bank/insights-and-data/articles/global-investment-returns-yearbook-2026.html)
+- [UBS Yearbook 2026 summary — London Business School](https://www.london.edu/news/ubs-global-investment-returns-yearbook-2026-history-risk-and-return-in-turbulent-times)
+- [UK inflation — House of Commons Library](https://commonslibrary.parliament.uk/research-briefings/sn02792/)
+- [Bank of England Monetary Policy Report, July 2026](https://www.bankofengland.co.uk/monetary-policy-report/2026/july-2026)
+- [FRED — US CPI (CPIAUCSL)](https://fred.stlouisfed.org/series/CPIAUCSL)

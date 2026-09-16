@@ -39,7 +39,16 @@ python3 06_emerging_markets.py  # does fast GDP growth pay investors? (it doesn'
 python3 07_uk_300_per_month.py  # UK: what £300/mo becomes; ISA/LISA/pension maths
 ```
 
-`07` needs no data download -- it is pure projection arithmetic.
+```bash
+python3 08_real_returns.py    # the same, inflation-adjusted; validates 6.6% real
+```
+
+`07` needs no data download. `08` needs CPIAUCSL.csv from FRED and
+`vg/^GSPC.csv` from fetch_vanguard.py:
+
+```bash
+curl -o CPIAUCSL.csv "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL"
+```
 
 `04_multi_asset.py` is the one that answers "what beats 4%". It needs both the
 ECB file and `yf/`.
