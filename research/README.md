@@ -31,6 +31,10 @@ python3 04_multi_asset.py     # 31 instruments: direction, financing, vs buy-and
 
 python3 fetch_vanguard.py     # writes vg/*.csv (Vanguard fund total returns)
 python3 05_index_funds.py     # Vanguard funds vs 4%: the rolling-window reliability table
+
+python3 fetch_em.py           # EM equity + global bond ETFs -> em/*.csv
+python3 fetch_gdp.py          # World Bank real GDP growth -> wb/gdp.json
+python3 06_emerging_markets.py  # does fast GDP growth pay investors? (it doesn't)
 ```
 
 `04_multi_asset.py` is the one that answers "what beats 4%". It needs both the
