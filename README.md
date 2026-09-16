@@ -63,10 +63,12 @@ src/CarryTrendFx.cs     the cBot (compiles clean, ~1,160 lines, commented)
 docs/RESEARCH.md        Part 1: FX. Part 2: 31 instruments, 41 years
 docs/INDEX_FUNDS.md     Part 3: Vanguard funds -- what actually beat 4%
 docs/EMERGING_MARKETS.md Part 4: emerging markets, growth stories, bonds
+docs/UK_300_A_MONTH.md  Part 5: UK, £300/month -- the practical answer
 research/01..03         EUR/USD and multi-pair FX studies
 research/04             multi-asset study; fetch_data.py downloads the data
 research/05             Vanguard index funds; fetch_vanguard.py downloads the data
 research/06             emerging markets vs GDP growth; EM and global bonds
+research/07             UK £300/month projections: wrappers, platforms, fees
 ```
 
 > **Read [docs/INDEX_FUNDS.md](docs/INDEX_FUNDS.md) before this one.** Across all

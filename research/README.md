@@ -35,7 +35,11 @@ python3 05_index_funds.py     # Vanguard funds vs 4%: the rolling-window reliabi
 python3 fetch_em.py           # EM equity + global bond ETFs -> em/*.csv
 python3 fetch_gdp.py          # World Bank real GDP growth -> wb/gdp.json
 python3 06_emerging_markets.py  # does fast GDP growth pay investors? (it doesn't)
+
+python3 07_uk_300_per_month.py  # UK: what £300/mo becomes; ISA/LISA/pension maths
 ```
+
+`07` needs no data download -- it is pure projection arithmetic.
 
 `04_multi_asset.py` is the one that answers "what beats 4%". It needs both the
 ECB file and `yf/`.
