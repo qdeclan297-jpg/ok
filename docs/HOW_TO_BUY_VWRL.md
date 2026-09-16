@@ -120,20 +120,94 @@ That's the whole system. One fund, bought automatically, never touched.
 
 ---
 
-## If you stay with VWRL, handle the dividends
+## How VWRL dividends actually work
 
-Distributions arrive roughly quarterly as cash in your ISA. **They do not
-reinvest themselves.** Cash sitting in the account earns nothing and quietly
-drags your return below the numbers I've quoted — all of which assume dividends
-reinvested.
+### Yes, you get them — quarterly
 
-Either:
-- add a calendar reminder each quarter to buy more VWRL with whatever's landed, or
-- check whether your platform offers automatic dividend reinvestment and turn it
-  on, or
-- switch to VWRP and stop thinking about it.
+VWRL's ex-dividend dates fall in **March, June, September and December**. Recent
+payments per share:
 
-Inside an ISA, switching between them is free and not a taxable event.
+| Ex-dividend date | Per share |
+|---|---|
+| 2025-09-18 | £0.3119 |
+| 2025-12-18 | £0.4076 |
+| 2026-03-19 | £0.3426 |
+| 2026-06-18 | £0.6833 |
+
+The last four total **£1.7454 per share**. At ~£138 a share that's a trailing
+yield of about **1.27%**. June is usually the big one; the others are smaller.
+
+### What that means in real money
+
+| Invested | Shares | Per year | Per quarter |
+|---|---|---|---|
+| £300 | 2.18 | ~£3.80 | **~£0.95** |
+| £1,000 | 7.25 | ~£12.65 | ~£3.16 |
+| £3,600 | 26.10 | ~£45.56 | ~£11.39 |
+| £10,000 | 72.51 | ~£127 | ~£32 |
+| £50,000 | 362.53 | ~£633 | ~£158 |
+| £100,000 | 725.06 | ~£1,266 | ~£316 |
+
+Early on the payments are **tiny** — under a pound a quarter on £300. That's
+normal, not a mistake. Dividends only become meaningful money once the pot is
+large, which is exactly why they're not the point at your stage.
+
+### The bit that confuses everyone
+
+**A dividend is not a bonus. On the ex-dividend date the fund's price drops by
+roughly the dividend amount.**
+
+Say VWRL is £138 and pays £0.34. On the ex-dividend morning it opens around
+£137.66, and £0.34 per share appears as cash. You had £138 of value; now you have
+£137.66 of fund plus £0.34 of cash. **Same £138.**
+
+Nothing was created. The money moved from inside the fund to your account. This
+is why the accumulating and distributing versions return exactly the same — one
+keeps the money working inside, the other hands it to you to redeploy.
+
+### Timing
+
+- **Ex-dividend date** — you must already own the shares *before* this date to
+  receive that payment. Buy on the day itself and you miss it.
+- **Pay date** — the cash actually lands, typically a few weeks later.
+
+### Where the money goes on Trading 212 — check this
+
+This depends entirely on **how you hold it**:
+
+| How you hold VWRL | What happens to dividends |
+|---|---|
+| **Inside a Pie** | Auto-reinvested. "Auto reinvest" (DRIP) is **on by default**, and the cash is redeployed across your Pie's targets. |
+| **Outside a Pie** (standalone holding) | Lands in your **free funds** as cash and **stays there**. DRIP is only available for Pies. |
+
+**So go and check whether your VWRL is in a Pie.** If it's a standalone holding
+with an AutoInvest plan, that plan invests your *deposits* — it does **not**
+reinvest dividends.
+
+If it's outside a Pie, either move it into a one-slice Pie (100% VWRL) with auto
+reinvest on, or set a quarterly reminder to buy more manually.
+
+### Why this matters
+
+Every return figure in this repo assumes dividends reinvested. Cash sitting idle
+in your account earns nothing, so un-reinvested dividends quietly drag you below
+those numbers. At £300 it's pennies. At £50,000 it's £633 a year doing nothing.
+
+### Tax
+
+**Inside an ISA: none.** No tax on the dividends, nothing to declare, nothing to
+report on a tax return.
+
+One thing you can't avoid: the fund pays **15% US withholding tax** on its US
+dividends internally, before the money ever reaches you. That's already inside
+the figures above and can't be reclaimed — it's a consequence of the fund being
+Irish-domiciled, and it's still better than the 30% a non-treaty domicile pays.
+
+### If the faff isn't worth it
+
+Switching to **VWRP** (accumulating) removes the entire problem — dividends
+compound inside the fund with no action from you. Inside an ISA the switch is
+free and not a taxable event.
 
 ---
 
