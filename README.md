@@ -9,43 +9,60 @@ IC Markets Raw cost structure ($6/lot round turn, 0.0–0.1 pip spreads).
 formerly cAlgo) runs .NET. `src/CarryTrendFx.cs` is a `.cs` file you paste
 into cTrader's code editor. There is no C option.
 
-**2. I backtested this on 27 years of real EUR/USD data and it did not beat
-your bank.** Net 1.89%/yr at 10% volatility with a 26% drawdown, against your
-savings account's 4% with no drawdown at all. Diversifying across 17 pairs
-made it worse, not better. The full evidence is in
-**[docs/RESEARCH.md](docs/RESEARCH.md)** — please read it before risking money.
+**2. One configuration beats 4%, and it isn't EUR/USD.** Tested across 31
+instruments and 41 years:
 
-I built the bot anyway because you asked for it and because the engineering is
-sound and reusable. But I'm not going to tell you it clears 4% when my own
-testing says otherwise.
+| Configuration | Return | Vol | Max DD | vs 4% |
+|---|---|---|---|---|
+| EUR/USD trend (the original) | 1.89%/yr | 10% | 25.7% | loses |
+| Multi-asset long/short | 3.70%/yr | 10% | 43.5% | loses |
+| **Multi-asset, no FX, LONG ONLY** | **6.41%/yr** | 10% | 33.4% | **beats** |
+| Just owning the same assets | 8.42%/yr | 10% | 33.4% | beats |
+
+So: run it **long-only across many non-FX instruments** and it clears your
+hurdle. But buy-and-hold beat it in every period I tested, by roughly the
+1.9%/yr that CFD financing costs. The full evidence is in
+**[docs/RESEARCH.md](docs/RESEARCH.md)** — read it before risking money.
 
 ---
 
-## The one finding that surprised me
+## The findings that matter
 
-Your cheap commissions are real, and they are **not** what stands between you
-and a profitable bot.
+**1. Your cheap commissions are real, and they are not the problem.** At this
+bot's turnover, FX transaction costs came to 0.024% of capital per year.
+Raising the assumed round-turn cost from 0.8 to 6.0 pips changed net return by
+0.16%/yr. Commission is a rounding error at this speed. What kills retail bots
+is *turnover*: a scalper doing 5 round turns a day on a $25k account burns
+~12% of capital per year. This bot decides once a day and holds ~7 weeks.
 
-At this bot's turnover, all-in costs came to **0.024% of capital per year**.
-Raising the assumed round-turn cost from 0.8 pips to 6.0 pips — more than
-seven times worse — changed net return by 0.16%/yr. Cost is a rounding error
-here.
+**2. Outside FX, financing is the whole game.** IC Markets finances cash index
+CFDs at the overnight benchmark **+250bp on longs and −250bp on shorts** — you
+pay the 2.5% markup in either direction, and it never appears in your trade
+list. On a vol-targeted book that is ~1.9%/yr off the top:
 
-What kills retail bots is *turnover*, not the per-trade rate. A scalper doing
-5 round turns a day on a $25k account burns ~12% of capital per year in
-costs. This bot makes one decision a day, holds for about seven weeks, and
-uses a no-trade buffer so small signal wobbles never fire an order.
+| Financing assumption | Net return | Sharpe |
+|---|---|---|
+| Zero (fantasy) | 8.30%/yr | 0.83 |
+| **IC Markets, ±250bp** | **6.41%/yr** | **0.64** |
+| ETF-like, ~0.1%/yr | 8.23%/yr | 0.82 |
 
-So the design is right. The edge just isn't there on one currency pair.
+The bot models this per asset class, warns at startup, and reports accrued
+financing separately from commission when it stops.
+
+**3. Direction matters more than instrument choice.** Across 22 non-FX
+instruments: long-only 6.41%/yr (Sharpe 0.64), long/short 3.70% (0.37),
+short-only **−6.49%**. These assets drift up; shorting fights the risk
+premium and pays financing to do it.
 
 ---
 
 ## What's in here
 
 ```
-src/CarryTrendFx.cs     the cBot (compiles clean; ~900 lines, commented)
-docs/RESEARCH.md        the evidence, the numbers, and the honest conclusion
-research/               scripts that reproduce every number, free data
+src/CarryTrendFx.cs     the cBot (compiles clean, ~1,160 lines, commented)
+docs/RESEARCH.md        Part 1: FX. Part 2: 31 instruments, 41 years
+research/01..03         EUR/USD and multi-pair FX studies
+research/04             multi-asset study; fetch_data.py downloads the data
 ```
 
 ## How it works
@@ -83,8 +100,9 @@ to 25.7%, for 0.06%/yr of return. On by default.
 1. cTrader → **Automate** → **New cBot**
 2. Paste `src/CarryTrendFx.cs` over the template
 3. Build (F6)
-4. Attach to a **EUR/USD** chart — any timeframe, decisions are made off the
-   daily series regardless
+4. Attach to a chart — any instrument, any timeframe; decisions are made off
+   the daily series regardless. **Set `Asset class` to match the instrument**;
+   it drives the financing model and the startup warnings
 5. Scroll the daily chart back far enough to load **300+ daily bars**, or the
    256-day EMA has nothing to work with. The bot warns you if history is short.
 6. **Run on demo first.** Set `Dry run` = true to watch it decide without
@@ -100,7 +118,11 @@ to 25.7%, for 0.06%/yr of return. On by default.
 | Kill switch drawdown % | 20.0 | Flattens and halts |
 | Daily loss limit % | 4.0 | Flattens for the day |
 | Max gross leverage | 5.0 | Hard notional cap |
-| Trend / carry weight | 0.75 / 0.25 | Carry alone tested at ~zero Sharpe |
+| Asset class | Fx | Drives financing model + warnings. **Set this** |
+| Allow short positions | true | **Set false for non-FX** — see finding 3 |
+| Annual holding cost % | 0 (auto) | Override the per-class financing estimate |
+| Diversification multiplier | 1.0 | Raise when running many instruments |
+| Trend / carry weight | 0.75 / 0.25 | Carry is ignored outside FX (there it's just financing) |
 | No-trade buffer | 0.15 | Wider = less turnover. 0.15–0.40 all tested fine |
 | Max spread to trade | 1.0 pips | Skips the trade if the spread is wider |
 | Commission per lot RT | 6.0 | Your IC Markets Raw rate |
@@ -134,10 +156,35 @@ mcs -target:library -r:calgo_stub.dll -out:bot.dll ../src/CarryTrendFx.cs
 
 To reproduce the backtests, see [research/README.md](research/README.md).
 
+## Running it multi-instrument
+
+This is the configuration that cleared 4%. Attach the bot to several charts:
+
+- Set **`Asset class`** per instrument (Index for US500/NAS100/GER40, Metal for
+  XAUUSD/XAGUSD, Energy for WTI, and so on).
+- Set **`Allow short positions` = false** on everything except FX.
+- Set **`Instrument weight` = 1/N** across N charts, so the combined book still
+  targets your chosen volatility rather than N times it.
+- Raise **`Diversification multiplier`** if the combined book runs under
+  target — with uncorrelated instruments, 1/N weighting under-risks you.
+
+A reasonable starting universe from the tested set: US500, NAS100, GER40,
+JP225, XAUUSD, XAGUSD, COPPER, WTI — eight instruments, weight 0.125 each,
+long-only.
+
 ## Known limitations
 
-- **The measured edge is weak.** Net Sharpe 0.19 over 1999–2026, and negative
-  out-of-sample in the multi-pair test. Treat it as a research platform.
+- **The long-only result is mostly beta, not alpha.** It is the risk premium of
+  the underlying assets captured through an expensive wrapper. Buy-and-hold beat
+  it in every period tested. What the trend filter genuinely buys is smaller
+  equity drawdowns (37.2% vs 53.1% on indices), not more return.
+- **Indices-only degraded badly out of sample**: 5.89%/yr in 1985–2012 versus
+  1.82%/yr in 2013–2026, while buy-and-hold held near 6.3%.
+- **FX is the worst asset class tested** — negative mean Sharpe across 9 pairs.
+  The EUR/USD config is kept for reference, not as a recommendation.
+- **Commodity and bond backtests use Yahoo front-month splices**, whose roll
+  gaps appear as returns that were not tradeable. Index results are clean;
+  treat commodity numbers as noisier.
 - **Backtested on ECB reference fixings**, which are daily reference rates,
   not tradeable bid/ask closes. Re-run it in cTrader's backtester on IC
   Markets tick data before drawing conclusions.

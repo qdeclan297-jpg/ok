@@ -1,8 +1,13 @@
 # Can a EUR/USD cBot reliably beat a 4% savings account?
 
-**Short answer: on the evidence I could gather, no.** Not on one pair, and not
-on seventeen. This document shows the work, because the negative result is
-more valuable to you than the code is.
+**Short answer: not on EUR/USD, and not on FX at all.** Part 1 below shows
+why. **Part 2 tests 31 instruments across seven asset classes and does find a
+configuration that clears 4%** — long-only, multi-asset, no FX, at 6.41%/yr.
+It also shows that simply *owning* those assets beat the bot in every single
+period tested.
+
+This document shows the work, because the negative results are more valuable
+to you than the code is.
 
 Everything below is reproducible with the scripts in `research/`, using free
 data from the ECB and FRED.
@@ -219,6 +224,142 @@ Run it on demo first. The defaults are deliberately conservative. Read
 
 ---
 
+# Part 2: beyond EUR/USD — 31 instruments, 41 years
+
+The first study said EUR/USD trend doesn't clear 4%. The obvious next question
+is whether a *different* market does. So I tested 31 instruments across seven
+asset classes on IC Markets-style CFDs: 9 equity indices, 3 metals, 3 energy,
+3 agricultural, 2 bond futures, 2 crypto and 9 FX pairs — 1985 to 2026.
+
+Reproduce with `research/fetch_data.py` then `research/04_multi_asset.py`.
+
+## The cost that actually matters outside FX
+
+For FX, all-in costs were 0.024%/yr. For everything else the dominant cost
+isn't commission at all — it's **financing**.
+
+IC Markets finances cash index CFDs at the overnight benchmark **+250bp on
+longs, −250bp on shorts**. You pay the 2.5% markup in *either* direction. On
+a vol-targeted book that runs roughly 1× notional, that is ~2%/yr straight off
+the top, and it never appears in your trade list.
+
+| Financing assumption | Net return | Sharpe |
+|---|---|---|
+| Zero (fantasy) | 8.30%/yr | 0.83 |
+| **IC Markets, benchmark ±250bp** | **6.41%/yr** | **0.64** |
+| ETF-like, ~0.1%/yr | 8.23%/yr | 0.82 |
+| 2× markup | 4.52%/yr | 0.45 |
+
+**The CFD wrapper costs about 1.9%/yr.** Same strategy, same instruments — the
+difference is purely how you hold them.
+
+## Direction matters far more than instrument choice
+
+| Configuration (22 non-FX instruments) | Net/yr | Sharpe | Max DD |
+|---|---|---|---|
+| Long/short | 3.70% | 0.37 | 43.5% |
+| **Long only** | **6.41%** | **0.64** | **33.4%** |
+| Short only | −6.49% | −0.65 | 322% |
+
+Long-only nearly doubles return *and* cuts drawdown. The short side is not
+merely weak, it is actively destructive: these assets drift upward, so
+shorting fights the risk premium and pays financing for the privilege.
+
+This is the single most useful finding in the whole exercise, and the bot now
+warns you at startup if you enable shorting on a non-FX instrument.
+
+### Per-class results (mean Sharpe, net of costs)
+
+| Class | Mean Sharpe | n |
+|---|---|---|
+| Crypto | +0.32 | 2 |
+| Metal | +0.21 | 3 |
+| Index | +0.07 | 9 |
+| Energy | +0.02 | 3 |
+| Agricultural | −0.08 | 3 |
+| Bond | −0.10 | 2 |
+| **FX** | **−0.14** | 9 |
+
+Across all 31, mean Sharpe was **0.010**. FX was the *worst* class — which
+retrospectively justifies the first study's conclusion, and answers your
+question directly: yes, trade something other than EUR/USD.
+
+## Does it beat 4%? Yes — one configuration does
+
+| | Return | Vol | Max DD | vs 4% |
+|---|---|---|---|---|
+| Bank savings | 4.00%/yr | 0% | 0% | — |
+| Trend bot, all 31 | 3.25%/yr | 10% | 41.3% | loses |
+| Trend bot, no-FX long/short | 3.70%/yr | 10% | 43.5% | loses |
+| **Trend bot, no-FX LONG ONLY** | **6.41%/yr** | 10% | 33.4% | **beats** |
+| Owning the same assets | 8.42%/yr | 10% | 33.4% | beats |
+
+So there *is* a configuration that clears your hurdle: **long-only,
+multi-asset, no FX — 6.41%/yr at Sharpe 0.64.** It holds up out of sample
+(5.67%/yr in 2013–2026 against 6.86% in 1985–2012), which is more than the
+FX version could say.
+
+## But the honest caveat, stated plainly
+
+**Owning the same assets beat the bot in every period and every universe.**
+
+| Universe | Period | Trend bot | Buy & hold |
+|---|---|---|---|
+| no-FX (22) | full | 6.41% | **8.42%** |
+| no-FX (22) | 1985–2012 | 6.86% | **8.87%** |
+| no-FX (22) | 2013–2026 | 5.67% | **8.50%** |
+| Indices (9) | full | 4.47% | **6.58%** |
+| Indices (9) | 2013–2026 | 1.82% | **6.25%** |
+
+Everything is scaled to the same 10% volatility, so these are equal-risk
+comparisons. The trend bot loses to buy-and-hold by roughly 2%/yr — which is
+almost exactly the financing markup.
+
+That tells you what the long-only result really is. It is **not trend alpha.**
+It is the risk premium of the underlying assets, captured through an expensive
+wrapper, with a trend filter that sits out some downturns. The filter earns
+its keep on drawdown for equity indices (37.2% vs 53.1% for buy-and-hold) —
+that is genuine and worth something. It does not earn its keep on return.
+
+Note also how badly indices-only degraded out of sample: 5.89% in 1985–2012
+against 1.82% in 2013–2026, while buy-and-hold held steady at ~6.3%. A
+2013–2026 equity market that mostly went up is a hard environment for a trend
+filter, because every whipsaw costs you the premium you stepped out of.
+
+## What this means
+
+Ranked by what the evidence supports:
+
+1. **Owning assets with a risk premium beats 4%** — 8.42%/yr at 10% vol
+   across 22 instruments, ~11.4%/yr for the S&P 500 with dividends. This is
+   the boring answer and it won every test I ran.
+2. **Long-only multi-asset trend on CFDs also beats 4%** — 6.41%/yr — but
+   costs ~2%/yr versus owning, in exchange for smaller equity drawdowns.
+3. **Long/short trend does not beat 4%** — 3.70%/yr, and 2.23%/yr out of
+   sample.
+4. **FX trend is the worst of the lot** — negative mean Sharpe across 9 pairs.
+
+If you want the bot to clear 4%, run it **long-only across many non-FX
+instruments**. If you want to clear 4% with the least friction, the CFD
+account is the wrong instrument for the job — that's what the 1.9%/yr
+financing gap is telling you.
+
+## Limitations of Part 2
+
+- Futures-based series (`GC=F`, `CL=F`, `ZN=F` …) are Yahoo's front-month
+  splices. Roll gaps appear as returns that were not tradeable, which adds
+  noise to the commodity and bond results. Index series (`^GSPC` …) have no
+  such problem and are the cleanest evidence here.
+- Instruments were chosen because they exist and are liquid today. Mild
+  survivorship bias.
+- Financing is modelled as a constant per-class markup. Real rates move with
+  the benchmark; at a 0% overnight rate the short side receives less.
+- Buy-and-hold figures are price return only, so the comparison **understates**
+  buy-and-hold by roughly 1.8%/yr in dividends for equity indices.
+- No slippage, gap risk, or margin-call modelling.
+
+---
+
 ## Sources
 
 - [Robot class reference — cTrader Algo](https://help.ctrader.com/ctrader-algo/references/General/Robot/)
@@ -238,3 +379,6 @@ Run it on demo first. The defaults are deliberately conservative. Read
 - [ECB euro foreign exchange reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html)
 - [FRED — Federal Funds Effective Rate (DFF)](https://fred.stlouisfed.org/series/DFF)
 - [FRED — ECB Deposit Facility Rate (ECBDFR)](https://fred.stlouisfed.org/series/ECBDFR)
+- [IC Markets Indices Product Specification Sheet (financing = benchmark ±250bp)](https://cdn.icmarkets.com/uploads/FSA/Indices-Product-Specification-Sheet-FSA.pdf)
+- [IC Markets indices trading](https://www.ic.com/en/trading-markets/indices)
+- [NAS100 CFD spreads at IC Markets — BrokerChooser](https://brokerchooser.com/broker-reviews/ic-markets-review/nas100-spread)

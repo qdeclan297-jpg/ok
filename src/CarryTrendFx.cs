@@ -61,6 +61,22 @@ using cAlgo.API.Internals;
 
 namespace cAlgo.Robots
 {
+    /// <summary>
+    /// What kind of instrument this is. Drives the default holding-cost
+    /// estimate and the startup sanity warnings -- an index CFD and a
+    /// currency pair have very different economics.
+    /// </summary>
+    public enum InstrumentClass
+    {
+        Fx,
+        Index,
+        Metal,
+        Energy,
+        Agricultural,
+        Bond,
+        Crypto
+    }
+
     [Robot(AccessRights = AccessRights.None, TimeZone = TimeZones.UTC,
            Name = "CarryTrendFx", Version = "1.0.0")]
     public class CarryTrendFx : Robot
@@ -193,6 +209,17 @@ namespace cAlgo.Robots
         // Parameters -- Operations
         // ------------------------------------------------------------------
 
+        [Parameter("Asset class", Group = "Instrument", DefaultValue = InstrumentClass.Fx)]
+        public InstrumentClass AssetClass { get; set; }
+
+        [Parameter("Annual holding cost % (0 = auto)", Group = "Instrument",
+                   DefaultValue = 0.0, MinValue = 0.0, MaxValue = 50.0, Step = 0.25)]
+        public double AnnualHoldingCostPct { get; set; }
+
+        [Parameter("Diversification multiplier", Group = "Instrument", DefaultValue = 1.0,
+                   MinValue = 1.0, MaxValue = 3.0, Step = 0.05)]
+        public double Idm { get; set; }
+
         [Parameter("Position label", Group = "Ops", DefaultValue = "CarryTrendFx")]
         public string PositionLabel { get; set; }
 
@@ -237,6 +264,7 @@ namespace cAlgo.Robots
         private int _rebalanceCount;
         private double _cumulativeUnitsTraded;
         private double _cumulativeCostEstimate;
+        private double _cumulativeFinancingEstimate;
 
         // ==================================================================
         // Lifecycle
@@ -275,8 +303,44 @@ namespace cAlgo.Robots
                   "estimated all-in {2:F2} pips per round turn.",
                   CommissionPerLotRoundTurn, MaxSpreadPips, EstimatedRoundTurnCostPips());
 
+            ReportExpectedEconomics();
+
             // Evaluate immediately so a restart mid-trend re-establishes the book.
             Rebalance("startup");
+        }
+
+        /// <summary>
+        /// Says up front what holding this instrument costs and, where the
+        /// backtesting was unambiguous, warns about the configuration. These
+        /// warnings are not style preferences -- each one corresponds to a
+        /// result in docs/RESEARCH.md.
+        /// </summary>
+        private void ReportExpectedEconomics()
+        {
+            var holding = AnnualHoldingCostFraction();
+
+            Print("Instrument class {0}: estimated holding cost {1:P2}/yr of notional, " +
+                  "charged in BOTH directions.", AssetClass, holding);
+
+            if (AssetClass != InstrumentClass.Fx && AllowShort)
+                Print("WARNING: shorting is enabled on a {0}. In testing across 22 non-FX " +
+                      "instruments, long-only returned 6.41%/yr (Sharpe 0.64) while " +
+                      "long/short returned 3.70%/yr (Sharpe 0.37), and short-only lost " +
+                      "6.49%/yr. Consider setting 'Allow short positions' to false.",
+                      AssetClass);
+
+            if (AssetClass == InstrumentClass.Crypto)
+                Print("WARNING: crypto CFD financing runs around 15%/yr. A 10%-vol strategy " +
+                      "cannot out-earn that reliably. Size accordingly or trade spot elsewhere.");
+
+            if (CarryWeight > 0 && AssetClass != InstrumentClass.Fx)
+                Print("Carry weight is set but will be ignored: carry is only a real signal " +
+                      "in FX. Trend weight alone drives this instrument.");
+
+            if (InstrumentWeight >= 0.999 && Idm <= 1.001)
+                Print("Running as a single instrument at full weight. If you attach this bot " +
+                      "to N charts, set 'Instrument weight' to 1/N so the combined book still " +
+                      "targets {0:F1}%/yr rather than N times that.", TargetVolPct);
         }
 
         protected override void OnStop()
@@ -305,16 +369,26 @@ namespace cAlgo.Robots
             var roundTurns = lotsTraded / 2.0;   // a round turn is in + out
 
             Print("Turnover: {0} rebalances, {1:N2} lots traded ({2:N2} round turns), " +
-                  "estimated cost {3:C2}.",
-                  _rebalanceCount, lotsTraded, roundTurns, _cumulativeCostEstimate);
+                  "transaction cost {3:C2}, financing {4:C2}.",
+                  _rebalanceCount, lotsTraded, roundTurns,
+                  _cumulativeCostEstimate, _cumulativeFinancingEstimate);
 
             if (years > 0.05)
             {
                 var capital = RiskCapital();
-                Print("Annualised: {0:N1} round turns/yr, cost {1:C2}/yr ({2:P2} of capital/yr).",
+                var total = _cumulativeCostEstimate + _cumulativeFinancingEstimate;
+
+                Print("Annualised: {0:N1} round turns/yr | transactions {1:C2}/yr | " +
+                      "financing {2:C2}/yr | TOTAL {3:C2}/yr ({4:P2} of capital/yr).",
                       roundTurns / years,
                       _cumulativeCostEstimate / years,
-                      capital > 0 ? _cumulativeCostEstimate / years / capital : 0);
+                      _cumulativeFinancingEstimate / years,
+                      total / years,
+                      capital > 0 ? total / years / capital : 0);
+
+                if (_cumulativeFinancingEstimate > _cumulativeCostEstimate * 2)
+                    Print("NOTE: financing dominates your costs, not commission. " +
+                          "That is normal outside FX and is the main thing eating the edge.");
             }
         }
 
@@ -322,8 +396,25 @@ namespace cAlgo.Robots
         {
             _rebalanceCount++;
             _cumulativeUnitsTraded += Math.Abs(deltaUnits);
-            _cumulativeCostEstimate +=
-                Math.Abs(deltaUnits) * Symbol.PipValue * EstimatedRoundTurnCostPips() / 2.0;
+            _cumulativeCostEstimate += Math.Abs(deltaUnits) * RoundTurnCostPerUnit() / 2.0;
+        }
+
+        /// <summary>
+        /// Accrues one day of holding cost on the current book. Called once
+        /// per daily bar so the turnover report shows the financing drag
+        /// alongside the transaction cost -- on non-FX instruments financing
+        /// is by far the larger of the two, and it is invisible in the trade
+        /// list, so it has to be surfaced deliberately.
+        /// </summary>
+        private void AccrueHoldingCost()
+        {
+            var units = Math.Abs(NetUnits());
+            if (units <= 0) return;
+
+            var notional = units * Symbol.Bid;
+            if (notional <= 0) return;
+
+            _cumulativeFinancingEstimate += notional * AnnualHoldingCostFraction() / 365.0;
         }
 
         protected override void OnTick()
@@ -334,6 +425,7 @@ namespace cAlgo.Robots
         private void OnDailyBarOpened(BarOpenedEventArgs obj)
         {
             SampleDailyEquity();
+            AccrueHoldingCost();
             ResetDailyAnchorIfNewDay();
             Rebalance("daily bar");
         }
@@ -591,6 +683,14 @@ namespace cAlgo.Robots
             if (CarryWeight <= 0)
                 return 0;
 
+            // On an index or commodity CFD the "swap" IS the financing charge:
+            // it is negative on longs and negative on shorts, so feeding it in
+            // as a carry signal would permanently bias the bot short for no
+            // good reason. Carry is only a real signal in FX, where it
+            // reflects a genuine interest-rate differential.
+            if (AssetClass != InstrumentClass.Fx)
+                return 0;
+
             var annualCarryPct = AnnualisedNetCarryPct();
             if (double.IsNaN(annualCarryPct) || annualCarryPct == 0)
                 return 0;
@@ -712,13 +812,35 @@ namespace cAlgo.Robots
         /// </summary>
         private double AveragePositionUnits()
         {
-            var sigmaPips = _sigmaPrice / Symbol.PipSize;
-            var cashVolPerUnitPerYear = sigmaPips * Symbol.PipValue * Math.Sqrt(TradingDaysPerYear);
+            var cashVolPerUnitPerYear = CashVolatilityPerUnitPerYear();
             if (cashVolPerUnitPerYear <= 0)
                 return 0;
 
-            var targetCashVol = RiskCapital() * (TargetVolPct / 100.0) * InstrumentWeight;
+            var targetCashVol = RiskCapital() * (TargetVolPct / 100.0)
+                              * InstrumentWeight * Idm;
             return targetCashVol / cashVolPerUnitPerYear;
+        }
+
+        /// <summary>
+        /// Annualised cash volatility of ONE unit of this instrument, in the
+        /// account currency. Built from TickSize/TickValue rather than pips
+        /// so it is correct for index, metal and commodity CFDs as well as
+        /// currency pairs -- a "pip" is not a meaningful unit on US500.
+        /// </summary>
+        private double CashVolatilityPerUnitPerYear()
+        {
+            var tickSize = Symbol.TickSize;
+            var tickValue = Symbol.TickValue;
+
+            if (tickSize > 0 && tickValue > 0)
+                return (_sigmaPrice / tickSize) * tickValue * Math.Sqrt(TradingDaysPerYear);
+
+            // Fall back to pips if the server does not populate tick data.
+            if (Symbol.PipSize > 0 && Symbol.PipValue > 0)
+                return (_sigmaPrice / Symbol.PipSize) * Symbol.PipValue
+                       * Math.Sqrt(TradingDaysPerYear);
+
+            return 0;
         }
 
         private double ApplyLeverageCap(double units)
@@ -764,7 +886,7 @@ namespace cAlgo.Robots
             // Do not pay real money to move a position by a trivial amount.
             // A rebalance crosses the spread once and pays one side of
             // commission, so it costs about half a round turn.
-            var costCash = Math.Abs(delta) * Symbol.PipValue * EstimatedRoundTurnCostPips() / 2.0;
+            var costCash = Math.Abs(delta) * RoundTurnCostPerUnit() / 2.0;
 
             var capital = RiskCapital();
             if (capital > 0 && costCash / capital > MaxRebalanceCostFraction)
@@ -802,6 +924,47 @@ namespace cAlgo.Robots
             var spreadPips = Symbol.Spread > 0 ? Symbol.Spread / Symbol.PipSize : 0.2;
 
             return commissionPips + spreadPips;
+        }
+
+        /// <summary>
+        /// Round-turn transaction cost for one unit, in the account currency.
+        /// Works across asset classes; pips are only used for FX-style display.
+        /// </summary>
+        private double RoundTurnCostPerUnit()
+        {
+            var lot = Symbol.LotSize > 0 ? Symbol.LotSize : 100000.0;
+            var commissionPerUnit = lot > 0 ? CommissionPerLotRoundTurn / lot : 0;
+
+            var spreadPerUnit = 0.0;
+            if (Symbol.Spread > 0 && Symbol.TickSize > 0 && Symbol.TickValue > 0)
+                spreadPerUnit = Symbol.Spread / Symbol.TickSize * Symbol.TickValue;
+
+            return commissionPerUnit + spreadPerUnit;
+        }
+
+        /// <summary>
+        /// Annual cost of simply HOLDING a position, as a fraction of
+        /// notional. On IC Markets cash index CFDs financing is the overnight
+        /// benchmark plus 250bp on longs and minus 250bp on shorts, so the
+        /// 2.5% markup is paid in either direction. Backtesting showed this
+        /// is the dominant cost for everything except FX -- it consumed about
+        /// 2.1%/yr out of 3.3%/yr gross on a 22-instrument portfolio.
+        /// </summary>
+        private double AnnualHoldingCostFraction()
+        {
+            if (AnnualHoldingCostPct > 0)
+                return AnnualHoldingCostPct / 100.0;
+
+            switch (AssetClass)
+            {
+                case InstrumentClass.Index:        return 0.025;
+                case InstrumentClass.Metal:        return 0.025;
+                case InstrumentClass.Energy:       return 0.010;
+                case InstrumentClass.Agricultural: return 0.010;
+                case InstrumentClass.Bond:         return 0.005;
+                case InstrumentClass.Crypto:       return 0.150;
+                default:                           return 0.0075;   // Fx
+            }
         }
 
         // ==================================================================

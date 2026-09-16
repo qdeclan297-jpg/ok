@@ -15,14 +15,23 @@ curl -o DFF.csv    "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF"
 curl -o ECBDFR.csv "https://fred.stlouisfed.org/graph/fredgraph.csv?id=ECBDFR"
 ```
 
+```bash
+# Multi-asset: 22 indices, metals, energy, ags, bonds and crypto from Yahoo
+pip install numpy
+python3 fetch_data.py          # writes yf/*.csv
+```
+
 ## Run
 
 ```bash
-pip install numpy
 python3 01_eurusd_trend.py    # EUR/USD trend: scaling, turnover, buffer sweep, cost sweep
 python3 02_trend_vs_carry.py  # trend vs carry vs blend, with carry accrual in P&L
-python3 03_multi_pair.py      # does diversifying across 17 pairs rescue it?
+python3 03_multi_pair.py      # does diversifying across 17 FX pairs rescue it?
+python3 04_multi_asset.py     # 31 instruments: direction, financing, vs buy-and-hold
 ```
+
+`04_multi_asset.py` is the one that answers "what beats 4%". It needs both the
+ECB file and `yf/`.
 
 ## Compile-checking the cBot without cTrader
 
@@ -36,9 +45,17 @@ mcs -target:library -out:calgo_stub.dll calgo_stub.cs
 mcs -target:library -r:calgo_stub.dll -out:bot.dll ../src/CarryTrendFx.cs
 ```
 
-## Caveat
+## Caveats
 
-ECB rates are daily reference fixings, not tradeable bid/ask closes, and the
-derived crosses in `03_multi_pair.py` compound two fixings. These scripts are
-for establishing whether an edge exists at all. They are not a substitute for
-a cTrader backtest on broker tick data.
+- ECB rates are daily reference fixings, not tradeable bid/ask closes, and the
+  derived crosses in `03_multi_pair.py` compound two fixings.
+- Yahoo's futures series (`GC=F`, `CL=F`, `ZN=F` …) are front-month splices.
+  Roll gaps show up as returns that were not tradeable, so commodity and bond
+  results are noisier than the index results, which are clean.
+- Yahoo silently downgrades to monthly bars on `range=max`; `fetch_data.py`
+  requests bounded windows to keep daily granularity.
+- Financing is modelled as a constant per-class markup matching the cBot's
+  `AnnualHoldingCostFraction()`. Real rates track the overnight benchmark.
+
+These scripts establish whether an edge exists at all. They are not a
+substitute for a cTrader backtest on broker tick data.
