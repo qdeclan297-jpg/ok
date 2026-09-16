@@ -28,6 +28,9 @@ python3 01_eurusd_trend.py    # EUR/USD trend: scaling, turnover, buffer sweep, 
 python3 02_trend_vs_carry.py  # trend vs carry vs blend, with carry accrual in P&L
 python3 03_multi_pair.py      # does diversifying across 17 FX pairs rescue it?
 python3 04_multi_asset.py     # 31 instruments: direction, financing, vs buy-and-hold
+
+python3 fetch_vanguard.py     # writes vg/*.csv (Vanguard fund total returns)
+python3 05_index_funds.py     # Vanguard funds vs 4%: the rolling-window reliability table
 ```
 
 `04_multi_asset.py` is the one that answers "what beats 4%". It needs both the

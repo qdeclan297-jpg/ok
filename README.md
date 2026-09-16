@@ -61,9 +61,15 @@ premium and pays financing to do it.
 ```
 src/CarryTrendFx.cs     the cBot (compiles clean, ~1,160 lines, commented)
 docs/RESEARCH.md        Part 1: FX. Part 2: 31 instruments, 41 years
+docs/INDEX_FUNDS.md     Part 3: Vanguard funds -- what actually beat 4%
 research/01..03         EUR/USD and multi-pair FX studies
 research/04             multi-asset study; fetch_data.py downloads the data
+research/05             Vanguard index funds; fetch_vanguard.py downloads the data
 ```
+
+> **Read [docs/INDEX_FUNDS.md](docs/INDEX_FUNDS.md) before this one.** Across all
+> three studies, a plain global index fund beat the bot on every measure. The bot
+> is here because it is good engineering and you asked for it, not because it won.
 
 ## How it works
 
