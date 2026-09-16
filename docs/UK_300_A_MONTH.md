@@ -2,6 +2,9 @@
 
 *All figures inflation-adjusted. Written for a 26-year-old investor.*
 
+> **Read [Part 6](PHILIPPINES_PLAN.md) alongside this.** It factors in the goal
+> of moving to the Philippines, which changes the LISA and pension advice here.
+
 £300/month in pounds changes the answer from the previous parts. For a UK
 investor the **wrapper you use is worth far more than the fund you pick**, and
 there are two options that beat every investment decision on the table because
@@ -103,7 +106,16 @@ to fix, ahead of every other decision in this document.
 **The catch:** locked until age 57–58, and taxable on the way out beyond the 25%
 tax-free lump sum. It is retirement money, not general savings.
 
-### Second: Lifetime ISA — at 26 you're comfortably eligible
+### Second: Lifetime ISA — but see the warning below
+
+> ⚠️ **Superseded for this reader.** [Part 6](PHILIPPINES_PLAN.md) establishes
+> that the goal is to move to the Philippines. The LISA's first-home benefit is
+> **UK property only**, and foreigners cannot own land in the Philippines at all.
+> That leaves the LISA as a locked-until-60 pot — still a real 25% bonus, but the
+> wrong priority if the plan is to leave in your forties. Read Part 6 before
+> acting on this section.
+
+### Lifetime ISA — at 26 you're comfortably eligible
 
 Open between 18 and 39, contribute until 50. The government adds **25% on every
 pound**, up to £1,000/year on £4,000 contributed. Your £3,600/year sits under

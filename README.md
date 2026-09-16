@@ -64,12 +64,15 @@ docs/RESEARCH.md        Part 1: FX. Part 2: 31 instruments, 41 years
 docs/INDEX_FUNDS.md     Part 3: Vanguard funds -- what actually beat 4%
 docs/EMERGING_MARKETS.md Part 4: emerging markets, growth stories, bonds
 docs/UK_300_A_MONTH.md  Part 5: UK, £300/month -- the practical answer
+docs/PHILIPPINES_PLAN.md Part 6: dividends, and the Philippines goal
 research/01..03         EUR/USD and multi-pair FX studies
 research/04             multi-asset study; fetch_data.py downloads the data
 research/05             Vanguard index funds; fetch_vanguard.py downloads the data
 research/06             emerging markets vs GDP growth; EM and global bonds
 research/07             UK £300/month projections: wrappers, platforms, fees
 research/08             the same in real terms; validates 6.6%/yr real equities
+research/09             dividend funds vs broad market; acc vs dist
+research/10             Philippines: pot needed, when £300/mo gets there
 ```
 
 > **Read [docs/INDEX_FUNDS.md](docs/INDEX_FUNDS.md) before this one.** Across all

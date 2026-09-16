@@ -50,6 +50,12 @@ python3 08_real_returns.py    # the same, inflation-adjusted; validates 6.6% rea
 curl -o CPIAUCSL.csv "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL"
 ```
 
+```bash
+python3 fetch_dividend_funds.py  # dividend-focused + acc/dist funds -> div/*.csv
+python3 09_dividend_funds.py     # do dividend funds beat the market? (no)
+python3 10_philippines_goal.py   # pot needed to live in the Philippines; no data needed
+```
+
 `04_multi_asset.py` is the one that answers "what beats 4%". It needs both the
 ECB file and `yf/`.
 
