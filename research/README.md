@@ -1,0 +1,44 @@
+# Research scripts
+
+These reproduce every number quoted in `docs/RESEARCH.md`. They mirror the
+C# logic in `src/CarryTrendFx.cs` so the backtest and the live bot agree.
+
+## Data (free, no API key)
+
+```bash
+# EUR/USD and 40+ other pairs, daily, 1999-present (ECB reference rates)
+curl -O https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip
+unzip eurofxref-hist.zip
+
+# Policy rates, for the carry leg
+curl -o DFF.csv    "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFF"
+curl -o ECBDFR.csv "https://fred.stlouisfed.org/graph/fredgraph.csv?id=ECBDFR"
+```
+
+## Run
+
+```bash
+pip install numpy
+python3 01_eurusd_trend.py    # EUR/USD trend: scaling, turnover, buffer sweep, cost sweep
+python3 02_trend_vs_carry.py  # trend vs carry vs blend, with carry accrual in P&L
+python3 03_multi_pair.py      # does diversifying across 17 pairs rescue it?
+```
+
+## Compile-checking the cBot without cTrader
+
+`calgo_stub.cs` is a minimal stub of the cAlgo API surface (signatures taken
+from help.ctrader.com). It is not a runtime implementation -- it exists so the
+bot can be type-checked on a machine with no cTrader install:
+
+```bash
+apt-get install -y mono-mcs
+mcs -target:library -out:calgo_stub.dll calgo_stub.cs
+mcs -target:library -r:calgo_stub.dll -out:bot.dll ../src/CarryTrendFx.cs
+```
+
+## Caveat
+
+ECB rates are daily reference fixings, not tradeable bid/ask closes, and the
+derived crosses in `03_multi_pair.py` compound two fixings. These scripts are
+for establishing whether an edge exists at all. They are not a substitute for
+a cTrader backtest on broker tick data.
